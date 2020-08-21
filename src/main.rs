@@ -30,12 +30,9 @@ async fn main() -> std::io::Result<()> {
     .await
 }
 
-async fn fetch(
-    data: web::Data<Arc<Mutex<HashMap<String, String>>>>,
-    path: web::Path<String>,
-) -> impl Responder {
+async fn fetch(data: web::Data<Arc<Mutex<HashMap<String, String>>>>) -> impl Responder {
     let a = data.lock().unwrap();
-    let content = a.get(&path.to_string());
+    let content = a.get("test");
     let a = match content {
         Some(value) => value.to_owned(),
         None => "not found".to_owned(),

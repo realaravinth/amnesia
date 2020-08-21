@@ -309,6 +309,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "amnesia"
+version = "0.1.0"
+dependencies = [
+ "actix-multipart",
+ "actix-rt",
+ "actix-web",
+ "env_logger",
+ "futures",
+ "hashbrown",
+]
+
+[[package]]
 name = "arc-swap"
 version = "0.4.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1231,18 +1243,6 @@ name = "ryu"
 version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "71d301d4193d031abdd79ff7e3dd721168a9572ef3fe51a1517aba235bd8f86e"
-
-[[package]]
-name = "sandbox"
-version = "0.1.0"
-dependencies = [
- "actix-multipart",
- "actix-rt",
- "actix-web",
- "env_logger",
- "futures",
- "hashbrown",
-]
 
 [[package]]
 name = "scopeguard"
