@@ -3,6 +3,7 @@ use actix_web::{middleware, web, App, Error, HttpResponse, HttpServer, Responder
 use futures::{StreamExt, TryStreamExt};
 use hashbrown::HashMap;
 use std::clone::Clone;
+use std::env;
 use std::str;
 use std::sync::{Arc, Mutex};
 
@@ -17,7 +18,10 @@ async fn main() -> std::io::Result<()> {
     );
 
     let data = Arc::new(Mutex::new(a.to_owned()));
-
+    let port = env::var("PORT")
+        .unwrap_or_else(|_| "3000".to_string())
+        .parse()
+        .expect("PORT must be a number");
     HttpServer::new(move || {
         App::new()
             .wrap(middleware::Logger::default())
@@ -25,7 +29,7 @@ async fn main() -> std::io::Result<()> {
             .route("/test", web::get().to(fetch))
             .route("/archive/", web::post().to(archive))
     })
-    .bind("0.0.0.0:8000")?
+    .bind(("0.0.0.0", port))?
     .run()
     .await
 }
