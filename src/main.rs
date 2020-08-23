@@ -35,13 +35,13 @@ async fn main() -> std::io::Result<()> {
 }
 
 async fn fetch(data: web::Data<Arc<Mutex<HashMap<String, String>>>>) -> impl Responder {
-    let a = data.lock().unwrap();
-    let content = a.get("test");
+    let guard = data.lock().unwrap();
+    let content = guard.get("test");
     let a = match content {
         Some(value) => value.to_owned(),
         None => "not found".to_owned(),
     };
-
+    std::mem::drop(guard);
     HttpResponse::Ok().content_type("text/html").body(a)
 }
 
@@ -60,6 +60,6 @@ async fn archive(
         }
     }
     data.lock().unwrap().insert(key.to_string(), content);
-
+    std::mem::drop(data);
     Ok(HttpResponse::Ok().body(key))
 }
