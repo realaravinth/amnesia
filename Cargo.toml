@@ -13,5 +13,4 @@ actix-multipart = "*"
 
 futures = "*"
 
-hashbrown = "0.8"
 env_logger = "0.7"

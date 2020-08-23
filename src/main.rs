@@ -1,8 +1,6 @@
 use actix_multipart::Multipart;
 use actix_web::{middleware, web, App, Error, HttpResponse, HttpServer, Responder};
 use futures::{StreamExt, TryStreamExt};
-use hashbrown::HashMap;
-use std::clone::Clone;
 use std::env;
 use std::str;
 use std::sync::{Arc, Mutex};
@@ -11,13 +9,7 @@ use std::sync::{Arc, Mutex};
 async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "actix_web=info");
     env_logger::init();
-    let mut a = HashMap::new();
-    a.insert(
-        "/".to_string(),
-        "under construction, please comeback later".to_string(),
-    );
-
-    let data = Arc::new(Mutex::new(a.to_owned()));
+    let data = Arc::new(Mutex::new(String::new()));
     let port = env::var("PORT")
         .unwrap_or_else(|_| "3000".to_string())
         .parse()
@@ -34,20 +26,13 @@ async fn main() -> std::io::Result<()> {
     .await
 }
 
-async fn fetch(data: web::Data<Arc<Mutex<HashMap<String, String>>>>) -> impl Responder {
+async fn fetch(data: web::Data<Arc<Mutex<String>>>) -> impl Responder {
     let guard = data.lock().unwrap();
-    let content = guard.get("test");
-    let a = match content {
-        Some(value) => value.to_owned(),
-        None => "not found".to_owned(),
-    };
-    std::mem::drop(guard);
-    HttpResponse::Ok().content_type("text/html").body(a)
+    HttpResponse::Ok().content_type("text/html").body(&*guard)
 }
-
 async fn archive(
     mut payload: Multipart,
-    data: web::Data<Arc<Mutex<HashMap<String, String>>>>,
+    data: web::Data<Arc<Mutex<String>>>,
 ) -> Result<HttpResponse, Error> {
     let key = "test";
 
@@ -59,7 +44,7 @@ async fn archive(
             content.push_str(x);
         }
     }
-    data.lock().unwrap().insert(key.to_string(), content);
+    std::mem::swap(&mut content, &mut *data.lock().unwrap());
     std::mem::drop(data);
     Ok(HttpResponse::Ok().body(key))
 }
