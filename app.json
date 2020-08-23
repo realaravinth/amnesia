@@ -1,0 +1,11 @@
+{
+    "name": "Amnesia: a very forgetful echo server",
+    "description": "A very forgetful statc-file echo server written in Rust",
+    "repository": "https://github.com/realaravinth/amnesia",
+    "success_url": "/",
+    "keywords": ["rust", "actix"],
+    "website": "https://github.com/emk/rust-buildpack-example-actix",
+    "env": {
+      "BUILDPACK_URL": "https://github.com/emk/heroku-buildpack-rust.git"
+    }
+}
