@@ -3,13 +3,11 @@ use actix_web::{middleware, web, App, Error, HttpResponse, HttpServer, Responder
 use futures::{StreamExt, TryStreamExt};
 use std::env;
 use std::str;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, RwLock};
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
-    std::env::set_var("RUST_LOG", "actix_web=info");
-    env_logger::init();
-    let data = Arc::new(Mutex::new(String::new()));
+    let data = Arc::new(RwLock::new("Data unavailable".to_string()));
     let port = env::var("PORT")
         .unwrap_or_else(|_| "3000".to_string())
         .parse()
@@ -26,16 +24,15 @@ async fn main() -> std::io::Result<()> {
     .await
 }
 
-async fn fetch(data: web::Data<Arc<Mutex<String>>>) -> impl Responder {
-    let guard = data.lock().unwrap();
-    HttpResponse::Ok().content_type("text/html").body(&*guard)
+async fn fetch(data: web::Data<Arc<RwLock<String>>>) -> impl Responder {
+    let content = data.read().unwrap();
+    HttpResponse::Ok().content_type("text/html").body(&*content)
 }
 async fn archive(
     mut payload: Multipart,
-    data: web::Data<Arc<Mutex<String>>>,
+    data: web::Data<Arc<RwLock<String>>>,
 ) -> Result<HttpResponse, Error> {
-    let key = "test";
-
+    use std::mem::swap;
     let mut content = String::new();
     while let Ok(Some(mut field)) = payload.try_next().await {
         while let Some(chunk) = field.next().await {
@@ -44,7 +41,8 @@ async fn archive(
             content.push_str(x);
         }
     }
-    std::mem::swap(&mut content, &mut *data.lock().unwrap());
-    std::mem::drop(data);
-    Ok(HttpResponse::Ok().body(key))
+
+    swap(&mut content, &mut *data.write().unwrap());
+    drop(data);
+    Ok(HttpResponse::Ok().finish())
 }

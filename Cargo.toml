@@ -12,5 +12,3 @@ actix-rt = "1.0"
 actix-multipart = "*"
 
 futures = "*"
-
-env_logger = "0.7"
